@@ -61,10 +61,10 @@ input{font-family:inherit}
 .cur-name{font-size:13px;font-weight:600;color:var(--t1)}
 .cur-key{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);margin-top:1px}
 .cur-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-left:auto}
-.rate-inp{width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:8px 10px;font:600 14px 'JetBrains Mono',monospace;color:var(--t1);background:#fff;text-align:center;transition:.15s;-moz-appearance:textfield;outline:none}
-.rate-inp::-webkit-inner-spin-button{-webkit-appearance:none}
+.rate-inp{width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:8px 10px;font:600 14px 'JetBrains Mono',monospace;color:var(--t1);background:#fff;text-align:center;transition:.15s;outline:none}
 .rate-inp:focus{border-color:var(--navy);background:rgba(27,58,107,.04)}
 .rate-inp::placeholder{color:var(--t3);font-weight:400;font-family:'Inter',sans-serif;font-size:12px}
+.rate-inp.invalid{border-color:var(--dn);background:rgba(224,48,80,.04)}
 .rates-footer{padding:12px 18px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);background:var(--card2)}
 .rates-footer-note{font-size:11px;color:var(--t3);flex:1}
 
@@ -449,23 +449,61 @@ function renderRates(){
           <div class="cur-key">${r.Name}</div>
         </div>
       </div>
-      <input class="rate-inp" type="number" step="0.01" min="0" placeholder="Курс"
-        data-id="${r._id}" data-f="buy" value="${r.buy_rate??''}" oninput="markDirty()">
-      <input class="rate-inp" type="number" step="0.01" min="0" placeholder="Курс"
-        data-id="${r._id}" data-f="sell" value="${r.sell_rate??''}" oninput="markDirty()">
+      <input class="rate-inp" type="text" inputmode="decimal" placeholder="00.00"
+        data-id="${r._id}" data-f="buy" value="${fmtRate(r.buy_rate)}"
+        oninput="rateInput(this)" onblur="rateBlur(this)" onfocus="rateFocus(this)">
+      <input class="rate-inp" type="text" inputmode="decimal" placeholder="00.00"
+        data-id="${r._id}" data-f="sell" value="${fmtRate(r.sell_rate)}"
+        oninput="rateInput(this)" onblur="rateBlur(this)" onfocus="rateFocus(this)">
     </div>`;
   }).join('');
   document.getElementById('saveBtn').disabled=false;
   document.getElementById('saveBtn').textContent='Опубликовать';
 }
 function markDirty(){if(!dirty){dirty=true;document.getElementById('saveBtn').textContent='Опубликовать ●'}}
+
+/* ── Rate input mask ── */
+function fmtRate(v){
+  if(v==null||v==='')return'';
+  const n=parseFloat(v);
+  return isNaN(n)?'':n.toFixed(2);
+}
+function rateInput(el){
+  // Allow only digits and one dot
+  let val=el.value.replace(/[^\d.]/g,'');
+  const parts=val.split('.');
+  if(parts.length>2)val=parts[0]+'.'+parts.slice(1).join('');
+  // Max 3 digits before dot, max 2 after
+  const [int,dec]=val.split('.');
+  let clean=(int||'').slice(0,3);
+  if(dec!==undefined)clean+='.'+dec.slice(0,2);
+  if(el.value!==clean){
+    const pos=el.selectionStart+(clean.length-el.value.length);
+    el.value=clean;
+    el.setSelectionRange(Math.max(0,pos),Math.max(0,pos));
+  }
+  el.classList.remove('invalid');
+  markDirty();
+}
+function rateBlur(el){
+  const val=el.value.trim();
+  if(val===''){el.classList.remove('invalid');return}
+  const n=parseFloat(val);
+  if(isNaN(n)||n<=0){el.classList.add('invalid');return}
+  el.value=n.toFixed(2);
+  el.classList.remove('invalid');
+}
+function rateFocus(el){
+  // Select all on focus for easy overwrite
+  setTimeout(()=>el.select(),0);
+}
 async function saveRates(){
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.textContent='Публикуем...';
   const byId={};
   document.querySelectorAll('.rate-inp').forEach(inp=>{
     if(!byId[inp.dataset.id])byId[inp.dataset.id]={row_id:inp.dataset.id,row:{}};
-    byId[inp.dataset.id].row[inp.dataset.f==='buy'?'buy_rate':'sell_rate']=parseFloat(inp.value);
+    byId[inp.dataset.id].row[inp.dataset.f==='buy'?'buy_rate':'sell_rate']=parseFloat(inp.value)||0;
   });
   try{
     await api('POST','xrates',{updates:Object.values(byId)});
