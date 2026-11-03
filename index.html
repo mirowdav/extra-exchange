@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Extra Exchange Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --bg:       #06090F;
+  --bg-1:     #0B0F18;
+  --bg-2:     #111827;
+  --bg-3:     #1A2233;
+  --br:       rgba(255,255,255,.07);
+  --br-2:     rgba(255,255,255,.12);
+  --t-1:      #F8FAFF;
+  --t-2:      #B0BECF;
+  --t-3:      #637384;
+  --a:        #3E7BFA;
+  --a-glow:   rgba(62,123,250,.35);
+  --up:       #22C55E;
+  --dn:       #F43F5E;
+  --usd-w:    #3B82F6;
+  --usd-b:    #8B5CF6;
+  --eur:      #F59E0B;
+  --eur5:     #EC4899;
+  --r-sm:     8px;
+  --r-md:     12px;
+  --r-lg:     16px;
+  --r-xl:     20px;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t-1);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input{font-family:inherit}
+.hidden{display:none!important}
+
+.app{max-width:640px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-left,0px)) 80px;padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.header{display:flex;align-items:center;gap:16px;margin-bottom:36px}
+.header-logo{position:relative;width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#1D4ED8 0%,#7C3AED 100%);display:grid;place-items:center;font-size:24px;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 32px rgba(62,123,250,.4)}
+.header-logo::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 60%)}
+.header-body{flex:1;min-width:0}
+.header-title{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.header-sub{margin-top:4px;font-size:13px;color:var(--t-3)}
+.header-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t-3);font-weight:500;padding:5px 10px;border-radius:20px;background:var(--bg-2);border:1px solid var(--br);flex-shrink:0}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--t-3);transition:background .3s,box-shadow .3s}
+.status-dot.ok{background:var(--up);box-shadow:0 0 6px var(--up)}
+.status-dot.err{background:var(--dn)}
+
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg-1);border:1px solid var(--br);border-radius:var(--r-lg);margin-bottom:28px}
+.tab{flex:1;padding:10px 16px;border-radius:var(--r-md);font-size:13px;font-weight:600;color:var(--t-3);transition:.15s}
+.tab.active{background:var(--bg-3);color:var(--t-1);box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.07)}
+.tab:not(.active):hover{color:var(--t-2)}
+
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-3)}
+
+.currency-list{display:flex;flex-direction:column;gap:6px}
+.cc{position:relative;display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:0 14px;padding:16px 18px;background:var(--bg-2);border:1px solid var(--br);border-radius:var(--r-lg);transition:border-color .2s;overflow:hidden}
+.cc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--r-lg) 0 0 var(--r-lg)}
+.cc-usd-w::before{background:var(--usd-w)}
+.cc-usd-b::before{background:var(--usd-b)}
+.cc-eur::before{background:var(--eur)}
+.cc-eur5::before{background:var(--eur5)}
+.cc:focus-within{border-color:var(--br-2)}
+.cc-icon{width:40px;height:40px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.cc-usd-w .cc-icon{background:rgba(59,130,246,.12)}
+.cc-usd-b .cc-icon{background:rgba(139,92,246,.12)}
+.cc-eur .cc-icon{background:rgba(245,158,11,.12)}
+.cc-eur5 .cc-icon{background:rgba(236,72,153,.12)}
+.cc-meta{}
+.cc-name{font-size:14px;font-weight:600;letter-spacing:-.2px}
+.cc-key{font-size:10px;font-weight:500;font-family:'JetBrains Mono',monospace;margin-top:3px;color:var(--t-3)}
+.rate-pair{display:flex;gap:8px;align-items:center}
+.rate-field{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.rate-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.rate-lbl-buy{color:var(--up)}
+.rate-lbl-sell{color:var(--dn)}
+.rate-input{width:84px;background:var(--bg-1);border:1px solid var(--br);border-radius:var(--r-sm);color:var(--t-1);font:600 15px/1 'JetBrains Mono',monospace;padding:7px 9px;text-align:right;transition:border-color .15s,background .15s;-moz-appearance:textfield}
+.rate-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.rate-input:focus{outline:none;border-color:var(--a);background:rgba(62,123,250,.06)}
+.rate-sep{width:1px;height:36px;background:var(--br);flex-shrink:0}
+
+.rates-footer{display:flex;align-items:center;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--br)}
+.rates-footer-note{font-size:12px;color:var(--t-3);flex:1;min-width:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 20px;border-radius:var(--r-md);font-size:13px;font-weight:600;transition:.15s;white-space:nowrap;flex-shrink:0}
+.btn-primary{background:var(--a);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 4px 16px var(--a-glow)}
+.btn-primary:hover:not(:disabled){background:#5089FB}
+.btn-primary:disabled{opacity:.4;cursor:default;box-shadow:none}
+.btn-ghost{background:var(--bg-2);color:var(--t-2);border:1px solid var(--br-2)}
+.btn-ghost:hover{color:var(--t-1);background:var(--bg-3)}
+.btn-danger{background:transparent;color:var(--dn);border:1px solid rgba(244,63,94,.25)}
+.btn-danger:hover{background:rgba(244,63,94,.1)}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:var(--r-sm)}
+.btn-icon{padding:5px;width:30px;height:30px}
+
+.ch-list{display:flex;flex-direction:column;gap:6px}
+.ch-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-2);border:1px solid var(--br);border-radius:var(--r-lg);transition:border-color .15s}
+.ch-card:hover{border-color:var(--br-2)}
+.ch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:box-shadow .3s}
+.ch-dot.on{background:var(--up);box-shadow:0 0 8px var(--up)}
+.ch-dot.off{background:var(--bg-3)}
+.ch-info{flex:1;min-width:0}
+.ch-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t-3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-type{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:20px;flex-shrink:0}
+.ch-type.img{background:rgba(59,130,246,.12);color:#60A5FA}
+.ch-type.txt{background:rgba(34,197,94,.1);color:#4ADE80}
+.ch-actions{display:flex;gap:4px;flex-shrink:0}
+.empty{text-align:center;padding:48px 20px;color:var(--t-3)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-text{font-size:15px;font-weight:500;margin-bottom:4px;color:var(--t-2)}
+.empty-sub{font-size:13px}
+
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--t-3);font-size:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid var(--br-2);border-top-color:var(--a);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center;z-index:100;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--bg-2);border:1px solid var(--br-2);border-radius:var(--r-xl);padding:28px;width:min(480px,100%);box-shadow:0 32px 80px rgba(0,0,0,.7);transform:translateY(8px) scale(.97);transition:transform .2s}
+.overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-title{font-size:18px;font-weight:700;letter-spacing:-.3px;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t-3);margin-bottom:7px}
+.field input[type=text]{width:100%;background:var(--bg-1);border:1px solid var(--br-2);border-radius:var(--r-sm);color:var(--t-1);font-size:14px;font-weight:500;padding:10px 12px;transition:border-color .15s,background .15s}
+.field input[type=text]:focus{outline:none;border-color:var(--a);background:rgba(62,123,250,.06)}
+.field input[type=text]::placeholder{color:var(--t-3)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg-btn{flex:1;min-width:0;padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--br-2);background:var(--bg-1);color:var(--t-3);font:500 13px 'Inter',sans-serif;transition:.15s;text-align:center}
+.seg-btn.on{background:rgba(62,123,250,.12);border-color:rgba(62,123,250,.4);color:var(--t-1)}
+.seg-btn:hover:not(.on){color:var(--t-2)}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--br)}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg-3);border:1px solid var(--br-2);border-radius:var(--r-md);padding:9px 18px;font-size:13px;font-weight:500;pointer-events:none;z-index:999;opacity:0;transition:opacity .2s,transform .2s;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:rgba(34,197,94,.35);color:var(--up)}
+#toast.err{border-color:rgba(244,63,94,.35);color:var(--dn)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="header">
+    <div class="header-logo">💱</div>
+    <div class="header-body">
+      <h1 class="header-title">Extra Exchange</h1>
+      <p class="header-sub">Управление курсами и каналами рассылки</p>
+    </div>
+    <div class="header-status">
+      <span class="status-dot" id="dot"></span>
+      <span id="dotText">—</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="rates">💸 Курсы</button>
+    <button class="tab"        data-tab="channels">📡 Каналы</button>
+  </div>
+
+  <div id="pane-rates">
+    <div class="section-hd">
+      <span class="section-label">Текущие курсы обмена</span>
+    </div>
+    <div class="currency-list" id="ratesWrap">
+      <div class="loading"><span class="spinner"></span>Загружаем курсы...</div>
+    </div>
+    <div class="rates-footer">
+      <span class="rates-footer-note" id="savedAt"></span>
+      <button class="btn btn-ghost btn-sm" onclick="loadRates()">↺ Обновить</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveRates()" disabled>Сохранить</button>
+    </div>
+  </div>
+
+  <div id="pane-channels" class="hidden">
+    <div class="section-hd">
+      <span class="section-label">Каналы рассылки</span>
+      <button class="btn btn-primary btn-sm" onclick="openModal()">+ Добавить</button>
+    </div>
+    <div class="ch-list" id="chWrap">
+      <div class="loading"><span class="spinner"></span>Загружаем каналы...</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Новый канал</div>
+    <input type="hidden" id="rowId">
+    <div class="field">
+      <label>Название канала</label>
+      <input type="text" id="fName" placeholder="Основной канал обмена">
+    </div>
+    <div class="field">
+      <label>Telegram ID или ссылка</label>
+      <input type="text" id="fId" placeholder="-100123456789  или  https://t.me/+…">
+    </div>
+    <div class="field">
+      <label>Тип сообщения</label>
+      <div class="seg">
+        <button class="seg-btn"    id="tImg" onclick="setType('image')">📸 Картинка PNG</button>
+        <button class="seg-btn on" id="tTxt" onclick="setType('text')">✉️ Текст</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Статус</label>
+      <div class="seg">
+        <button class="seg-btn on" id="tOn"  onclick="setActive(true)">✓ Активен</button>
+        <button class="seg-btn"    id="tOff" onclick="setActive(false)">⏸ Отключён</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost"   onclick="closeModal()">Отмена</button>
+      <button class="btn btn-primary" id="modalSave" onclick="saveChannel()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://n8.migas.studio/webhook';
+const CURRENCIES = {
+  USD_NEW: { label:'Доллар белый', icon:'💵', cls:'usd-w' },
+  USD_OLD: { label:'Доллар синий', icon:'💵', cls:'usd-b' },
+  EUR:     { label:'Евро',         icon:'💶', cls:'eur'   },
+  EUR_500: { label:'Евро (500)',   icon:'💶', cls:'eur5'  },
+};
+const ORDER = ['USD_NEW','USD_OLD','EUR','EUR_500'];
+let rates=[], channels=[], dirty=false, _img=false, _active=true;
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t===btn));
+    document.getElementById('pane-rates').classList.toggle('hidden', name!=='rates');
+    document.getElementById('pane-channels').classList.toggle('hidden', name!=='channels');
+    if (name==='channels' && !channels.length) loadChannels();
+  });
+});
+
+let _tt;
+function toast(msg, type='ok') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`show ${type}`;
+  clearTimeout(_tt); _tt=setTimeout(()=>el.className='', 2800);
+}
+function setStatus(ok, text) {
+  document.getElementById('dot').className='status-dot '+(ok?'ok':'err');
+  document.getElementById('dotText').textContent=text;
+}
+async function api(method, path, body) {
+  const r=await fetch(`${API}/${path}`,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+async function loadRates() {
+  document.getElementById('ratesWrap').innerHTML='<div class="loading"><span class="spinner"></span>Загружаем курсы...</div>';
+  document.getElementById('saveBtn').disabled=true;
+  try {
+    const d=await api('GET','xrates');
+    rates=d.results||[];
+    renderRates();
+    setStatus(true,'Онлайн');
+  } catch(e) {
+    document.getElementById('ratesWrap').innerHTML=`<div class="loading" style="color:var(--dn)">Ошибка: ${e.message}</div>`;
+    setStatus(false,'Ошибка');
+  }
+}
+function renderRates() {
+  const wrap=document.getElementById('ratesWrap');
+  const sorted=ORDER.map(k=>rates.find(r=>r.Name===k)).filter(Boolean);
+  dirty=false;
+  wrap.innerHTML=sorted.map(r=>{
+    const c=CURRENCIES[r.Name]||{label:r.Name,icon:'💱',cls:''};
+    return `<div class="cc cc-${c.cls}">
+      <div class="cc-icon">${c.icon}</div>
+      <div class="cc-meta">
+        <div class="cc-name">${c.label}</div>
+        <div class="cc-key">${r.Name}</div>
+      </div>
+      <div class="rate-pair">
+        <div class="rate-field">
+          <span class="rate-lbl rate-lbl-buy">Покупка</span>
+          <input class="rate-input" type="number" step="0.01" min="0"
+            data-id="${r._id}" data-f="buy" value="${r.buy_rate??''}" oninput="markDirty()">
+        </div>
+        <div class="rate-sep"></div>
+        <div class="rate-field">
+          <span class="rate-lbl rate-lbl-sell">Продажа</span>
+          <input class="rate-input" type="number" step="0.01" min="0"
+            data-id="${r._id}" data-f="sell" value="${r.sell_rate??''}" oninput="markDirty()">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('saveBtn').disabled=false;
+  document.getElementById('saveBtn').textContent='Сохранить';
+}
+function markDirty(){if(!dirty){dirty=true;document.getElementById('saveBtn').textContent='Сохранить ●'}}
+async function saveRates() {
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true; btn.textContent='Сохраняем...';
+  const byId={};
+  document.querySelectorAll('.rate-input').forEach(inp=>{
+    if(!byId[inp.dataset.id]) byId[inp.dataset.id]={row_id:inp.dataset.id,row:{}};
+    byId[inp.dataset.id].row[inp.dataset.f==='buy'?'buy_rate':'sell_rate']=parseFloat(inp.value);
+  });
+  try {
+    await api('POST','xrates',{updates:Object.values(byId)});
+    dirty=false;
+    const now=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('savedAt').textContent=`Сохранено в ${now}`;
+    toast('Курсы обновлены ✓');
+    await loadRates();
+  } catch(e) {
+    toast('Ошибка: '+e.message,'err');
+    btn.disabled=false; btn.textContent='Сохранить ●';
+  }
+}
+
+async function loadChannels() {
+  document.getElementById('chWrap').innerHTML='<div class="loading"><span class="spinner"></span>Загружаем каналы...</div>';
+  try {
+    const d=await api('GET','xchannels');
+    channels=d.results||[];
+    renderChannels();
+  } catch(e) {
+    document.getElementById('chWrap').innerHTML=`<div class="loading" style="color:var(--dn)">Ошибка: ${e.message}</div>`;
+  }
+}
+function renderChannels() {
+  const wrap=document.getElementById('chWrap');
+  if(!channels.length){
+    wrap.innerHTML='<div class="empty"><div class="empty-icon">📡</div><div class="empty-text">Каналов пока нет</div><div class="empty-sub">Добавь первый канал для рассылки курсов</div></div>';
+    return;
+  }
+  wrap.innerHTML=channels.map(ch=>`
+    <div class="ch-card">
+      <div class="ch-dot ${ch.active?'on':'off'}"></div>
+      <div class="ch-info">
+        <div class="ch-name">${esc(ch.Name)}</div>
+        <div class="ch-id">${esc(ch.channel_id||'—')}</div>
+      </div>
+      <span class="ch-type ${ch.send_rates_image?'img':'txt'}">${ch.send_rates_image?'📸 PNG':'✉️ Текст'}</span>
+      <div class="ch-actions">
+        <button class="btn btn-ghost btn-sm btn-icon" onclick='editChannel(${JSON.stringify(ch)})' title="Редактировать">✎</button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="delChannel('${ch._id}','${esc(ch.Name)}')" title="Удалить">✕</button>
+      </div>
+    </div>`).join('');
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function openModal(ch){
+  document.getElementById('modalTitle').textContent=ch?'Редактировать канал':'Новый канал';
+  document.getElementById('rowId').value=ch?._id||'';
+  document.getElementById('fName').value=ch?.Name||'';
+  document.getElementById('fId').value=ch?.channel_id||'';
+  _img=!!ch?.send_rates_image; _active=ch==null?true:!!ch.active;
+  syncSeg();
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('fName').focus(),50);
+}
+function editChannel(ch){openModal(ch)}
+function closeModal(){document.getElementById('overlay').classList.remove('open')}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal()}
+function setType(t){_img=t==='image';syncSeg()}
+function setActive(v){_active=v;syncSeg()}
+function syncSeg(){
+  document.getElementById('tImg').classList.toggle('on',_img);
+  document.getElementById('tTxt').classList.toggle('on',!_img);
+  document.getElementById('tOn').classList.toggle('on',_active);
+  document.getElementById('tOff').classList.toggle('on',!_active);
+}
+
+async function saveChannel(){
+  const btn=document.getElementById('modalSave');
+  const row_id=document.getElementById('rowId').value;
+  const name=document.getElementById('fName').value.trim();
+  const chId=document.getElementById('fId').value.trim();
+  if(!name||!chId){toast('Заполни название и ID канала','err');return}
+  btn.disabled=true; btn.textContent='...';
+  try {
+    await api('POST','xchannels',{action:row_id?'update':'create',row_id,name,channel_id:chId,send_rates_image:_img,active:_active,note:''});
+    toast(row_id?'Канал обновлён ✓':'Канал добавлен ✓');
+    closeModal();
+    await loadChannels();
+  } catch(e){toast('Ошибка: '+e.message,'err')}
+  finally{btn.disabled=false;btn.textContent='Сохранить'}
+}
+async function delChannel(id,name){
+  if(!confirm(`Удалить «${name}»?`))return;
+  try{await api('POST','xchannels',{action:'delete',row_id:id});toast('Удалено');await loadChannels()}
+  catch(e){toast('Ошибка: '+e.message,'err')}
+}
+
+loadRates();
+</script>
+</body>
+</html>
