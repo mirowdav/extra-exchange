@@ -343,12 +343,12 @@ tr:hover td{background:var(--card2)}
 <script>
 const API='https://n8.migas.studio/webhook';
 const CURR={
-  USD_NEW:{label:'Доллар белый',flag:'🇺🇸',dotColor:'#3B82F6'},
-  USD_OLD:{label:'Доллар синий',flag:'🇺🇸',dotColor:'#7C3AED'},
-  EUR:    {label:'Евро',        flag:'🇪🇺',dotColor:'#D97706'},
-  EUR_500:{label:'500 Евро',    flag:'🇪🇺',dotColor:'#DB2777'},
+  USD_NEW:{label:'Доллар белый',flag:'🇺🇸'},
+  USD_OLD:{label:'Доллар синий',flag:'🇺🇸'},
+  EUR:    {label:'Евро',        flag:'🇪🇺'},
+  EUR_500:{label:'500 Евро',    flag:'🇪🇺'},
 };
-const ORDER=['USD_NEW','USD_OLD','EUR','EUR_500'];
+const ORDER=['USD_OLD','USD_NEW','EUR','EUR_500'];
 
 let rates=[],channels=[],dirty=false,_img=false,_active=true,_nomedia=false;
 let allLogs=[],logPage=1;const PAGE=100;
@@ -454,7 +454,6 @@ function renderRates(){
           <div class="cur-name">${c.label}</div>
           <div class="cur-key">${r.Name}</div>
         </div>
-        <span class="cur-dot" style="background:${c.dotColor}"></span>
       </div>
       <input class="rate-inp" type="number" step="0.01" min="0" placeholder="Курс"
         data-id="${r._id}" data-f="buy" value="${r.buy_rate??''}" oninput="markDirty()">
