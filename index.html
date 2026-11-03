@@ -103,7 +103,7 @@ input{font-family:inherit}
 .ch-name{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
 .ch-id{font:11px/1.4 'JetBrains Mono',monospace;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .ch-badge{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:20px;flex-shrink:0}
-.ch-badge.img{background:rgba(59,130,246,.1);color:#2563EB}.ch-badge.txt{background:rgba(34,166,94,.1);color:#16A34A}
+.ch-badge.img{background:rgba(59,130,246,.1);color:#2563EB}.ch-badge.txt{background:rgba(34,166,94,.1);color:#16A34A}.ch-badge.med{background:rgba(109,40,217,.1);color:#7C3AED}
 .ch-acts{display:flex;gap:4px;flex-shrink:0}
 .ch-meta{display:flex;gap:5px;flex-wrap:wrap;width:100%;margin-top:4px}
 .ch-meta-item{font-size:10px;color:var(--t2);font-weight:500;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px}
@@ -311,17 +311,11 @@ tr:hover td{background:var(--card2)}
       </div>
     </div>
     <div class="field">
-      <label>Тип сообщения</label>
-      <div class="seg">
-        <button class="seg-btn" id="tImg" onclick="setType('image')">📸 PNG картинка</button>
-        <button class="seg-btn on" id="tTxt" onclick="setType('text')">✉️ Текст</button>
-      </div>
-    </div>
-    <div class="field">
       <label>Медиа</label>
       <div class="seg">
-        <button class="seg-btn" id="tNomedia" onclick="setNoMedia(true)">Без медиа</button>
-        <button class="seg-btn on" id="tMedia" onclick="setNoMedia(false)">С медиа</button>
+        <button class="seg-btn on" id="mPinned" onclick="setMedia('pinned')">📎 Из поста</button>
+        <button class="seg-btn"    id="mPng"    onclick="setMedia('png')">📊 PNG курсы</button>
+        <button class="seg-btn"    id="mNone"   onclick="setMedia('none')">✉️ Без медиа</button>
       </div>
     </div>
     <div class="field">
@@ -350,7 +344,7 @@ const CURR={
 };
 const ORDER=['USD_OLD','USD_NEW','EUR','EUR_500'];
 
-let rates=[],channels=[],dirty=false,_img=false,_active=true,_nomedia=false;
+let rates=[],channels=[],dirty=false,_media='pinned',_active=true;
 let allLogs=[],logPage=1;const PAGE=100;
 let logFilter='today',customFrom='',customTo='';
 
@@ -506,7 +500,7 @@ function renderChannels(){
         <div class="ch-name">${esc(ch.Name)}</div>
         <div class="ch-id">${esc(ch.channel_id||'—')}</div>
       </div>
-      <span class="ch-badge ${ch.send_rates_image?'img':'txt'}">${ch.send_rates_image?'📸 PNG':'✉️ Текст'}</span>
+      <span class="ch-badge ${ch.media_mode==='png'?'img':ch.media_mode==='none'?'txt':'med'}">${ch.media_mode==='png'?'📊 PNG':ch.media_mode==='none'?'✉️ Текст':'📎 Из поста'}</span>
       <div class="ch-acts">
         <button class="btn btn-g btn-sm btn-ico" onclick='editChannel(${JSON.stringify(ch)})' title="Ред.">✎</button>
         <button class="btn btn-d btn-sm btn-ico" onclick="delChannel('${ch._id}','${esc(ch.Name)}')" title="Удал.">✕</button>
@@ -527,8 +521,7 @@ function openModal(ch){
   document.getElementById('fInterval').value=ch?.interval_minutes!=null?ch.interval_minutes:60;
   document.getElementById('fStart').value=ch?.start_hour!=null?ch.start_hour:9;
   document.getElementById('fEnd').value=ch?.end_hour!=null?ch.end_hour:21;
-  _img=!!ch?.send_rates_image;
-  _nomedia=!!ch?.send_without_media;
+  _media=ch?.media_mode||'pinned';
   _active=ch==null?true:!!ch.active;
   syncSeg();
   document.getElementById('overlay').classList.add('open');
@@ -537,14 +530,12 @@ function openModal(ch){
 function editChannel(ch){openModal(ch)}
 function closeModal(){document.getElementById('overlay').classList.remove('open')}
 function maybeClose(e){if(e.target===document.getElementById('overlay'))closeModal()}
-function setType(t){_img=t==='image';syncSeg()}
+function setMedia(m){_media=m;syncSeg()}
 function setActive(v){_active=v;syncSeg()}
-function setNoMedia(v){_nomedia=v;syncSeg()}
 function syncSeg(){
-  document.getElementById('tImg').classList.toggle('on',_img);
-  document.getElementById('tTxt').classList.toggle('on',!_img);
-  document.getElementById('tNomedia').classList.toggle('on',_nomedia);
-  document.getElementById('tMedia').classList.toggle('on',!_nomedia);
+  document.getElementById('mPinned').classList.toggle('on',_media==='pinned');
+  document.getElementById('mPng').classList.toggle('on',_media==='png');
+  document.getElementById('mNone').classList.toggle('on',_media==='none');
   document.getElementById('tOn').classList.toggle('on',_active);
   document.getElementById('tOff').classList.toggle('on',!_active);
 }
@@ -561,7 +552,7 @@ async function saveChannel(){
   try{
     await api('POST','xchannels',{
       action:row_id?'update':'create',row_id,name,channel_id:chId,
-      send_rates_image:_img,send_without_media:_nomedia,active:_active,note:'',
+      media_mode:_media,active:_active,note:'',
       interval_minutes:isNaN(interval)?60:interval,
       start_hour:isNaN(startH)?9:startH,
       end_hour:isNaN(endH)?21:endH
