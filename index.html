@@ -58,9 +58,7 @@ input{font-family:inherit}
 .rate-row:hover{background:var(--card2)}
 .cur-info{display:flex;align-items:center;gap:10px;min-width:0}
 .cur-flag{font-size:22px;flex-shrink:0;line-height:1}
-.cur-name{font-size:13px;font-weight:600;color:var(--t1)}
-.cur-key{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);margin-top:1px}
-.cur-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-left:auto}
+.cur-name{font-size:13px;font-weight:600;color:var(--t1)}.cur-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-left:auto}
 .rate-inp{width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:8px 10px;font:600 14px 'JetBrains Mono',monospace;color:var(--t1);background:#fff;text-align:center;transition:.15s;outline:none}
 .rate-inp:focus{border-color:var(--navy);background:rgba(27,58,107,.04)}
 .rate-inp::placeholder{color:var(--t3);font-weight:400;font-family:'Inter',sans-serif;font-size:12px}
@@ -446,7 +444,6 @@ function renderRates(){
         <span class="cur-flag">${c.flag}</span>
         <div>
           <div class="cur-name">${c.label}</div>
-          <div class="cur-key">${r.Name}</div>
         </div>
       </div>
       <input class="rate-inp" type="text" inputmode="decimal" placeholder="00.00"
