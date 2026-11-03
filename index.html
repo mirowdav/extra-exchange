@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Extra Exchange — Админка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0f1117;
+  --surface: #1a1d27;
+  --border:  #2a2d3a;
+  --text:    #e8eaf0;
+  --muted:   #8b8fa8;
+  --accent:  #4f6ef7;
+  --accent2: #6c7fff;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --yellow:  #eab308;
+  --radius:  10px;
+  --font:    'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0 }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── Layout ─────────────────────────────────────────────── */
+.shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.logo {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 18px;
+}
+header h1 { font-size: 18px; font-weight: 600 }
+header span { font-size: 13px; color: var(--muted); margin-left: 2px }
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  padding: 4px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.tab {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: 500 13px var(--font);
+  cursor: pointer;
+  transition: .15s;
+}
+.tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+.tab:not(.active):hover { color: var(--text) }
+
+/* ─── Card ───────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 16px;
+}
+
+/* ─── Rates table ────────────────────────────────────────── */
+.rates-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+.rates-grid .hdr {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 0 0 10px;
+}
+.rates-grid .hdr:not(:first-child) { text-align: center }
+
+.rate-row {
+  display: contents;
+}
+.rate-row > * {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+.rate-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.rate-row .inp-cell {
+  justify-content: center;
+}
+input[type=number] {
+  width: 88px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font: 14px var(--font);
+  padding: 6px 10px;
+  text-align: right;
+  transition: border-color .15s;
+  -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none }
+input[type=number]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ─── Channels table ─────────────────────────────────────── */
+.ch-table { width: 100%; border-collapse: collapse }
+.ch-table th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  text-align: left;
+  padding: 0 12px 10px;
+}
+.ch-table th:last-child { text-align: center }
+.ch-table td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  vertical-align: middle;
+}
+.ch-table td:last-child { text-align: center }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge.on  { background: #16a34a22; color: var(--green) }
+.badge.off { background: #ef444422; color: var(--red) }
+
+.ch-id { font-size: 12px; color: var(--muted); font-family: monospace }
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border: none; border-radius: 7px;
+  font: 500 13px var(--font);
+  cursor: pointer; transition: .15s;
+}
+.btn-primary { background: var(--accent); color: #fff }
+.btn-primary:hover { background: var(--accent2) }
+.btn-primary:disabled { opacity: .5; cursor: default }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border) }
+.btn-ghost:hover { color: var(--text); border-color: var(--text) }
+.btn-danger { background: #ef444420; color: var(--red); border: 1px solid #ef444430 }
+.btn-danger:hover { background: #ef444430 }
+.btn-sm { padding: 5px 10px; font-size: 12px }
+
+.actions { display: flex; gap: 8px; margin-top: 18px; align-items: center }
+
+/* ─── Form ───────────────────────────────────────────────── */
+.form-row { margin-bottom: 14px }
+label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 500 }
+input[type=text], textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font: 14px var(--font);
+  padding: 8px 12px;
+  transition: border-color .15s;
+}
+input[type=text]:focus, textarea:focus { outline: none; border-color: var(--accent) }
+.checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px }
+.checkbox-row input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px }
+.checkbox-row span { font-size: 14px }
+
+/* ─── Toast ──────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 18px;
+  font-size: 14px; font-weight: 500;
+  transition: transform .3s, opacity .3s;
+  opacity: 0; pointer-events: none; z-index: 999;
+  white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1 }
+#toast.ok   { border-color: var(--green); color: var(--green) }
+#toast.err  { border-color: var(--red);   color: var(--red)   }
+
+/* ─── Loading ────────────────────────────────────────────── */
+.loading { color: var(--muted); font-size: 14px; padding: 20px 0; text-align: center }
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* ─── Modal ──────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none; place-items: center;
+  z-index: 100;
+}
+.overlay.open { display: grid }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: min(480px, calc(100vw - 32px));
+}
+.modal h3 { font-size: 16px; margin-bottom: 18px }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px }
+
+/* ─── Misc ───────────────────────────────────────────────── */
+.hidden { display: none !important }
+.status-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted); margin-left: auto;
+}
+.status-dot.ok  { background: var(--green) }
+.status-dot.err { background: var(--red) }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="logo">💱</div>
+    <div>
+      <h1>Extra Exchange <span>· Управление</span></h1>
+    </div>
+    <span class="status-dot" id="statusDot" title="Связь с базой"></span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('rates')">Курсы валют</button>
+    <button class="tab" onclick="switchTab('channels')">Каналы</button>
+  </div>
+
+  <!-- ─── RATES TAB ─── -->
+  <div id="tab-rates">
+    <div class="card">
+      <div class="card-title">Текущие курсы</div>
+      <div id="ratesBody"><div class="loading"><span class="spinner"></span>Загружаем...</div></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="saveRatesBtn" onclick="saveRates()" disabled>Сохранить курсы</button>
+      <button class="btn btn-ghost" onclick="loadRates()">↺ Обновить</button>
+    </div>
+  </div>
+
+  <!-- ─── CHANNELS TAB ─── -->
+  <div id="tab-channels" class="hidden">
+    <div class="card">
+      <div class="card-title">Список каналов</div>
+      <div id="channelsBody"><div class="loading"><span class="spinner"></span>Загружаем...</div></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="openChannelModal()">+ Добавить канал</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CHANNEL MODAL ─── -->
+<div class="overlay" id="chOverlay" onclick="closeChannelModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="chModalTitle">Новый канал</h3>
+    <input type="hidden" id="chRowId">
+    <div class="form-row">
+      <label>Название</label>
+      <input type="text" id="chName" placeholder="Основной канал">
+    </div>
+    <div class="form-row">
+      <label>ID или ссылка канала</label>
+      <input type="text" id="chId" placeholder="-1001234567890 или https://t.me/+...">
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="chImg">
+      <span>Отправлять картинку (PNG) вместо текста</span>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="chActive" checked>
+      <span>Канал активен</span>
+    </div>
+    <div class="form-row">
+      <label>Заметка (необязательно)</label>
+      <input type="text" id="chNote" placeholder="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeChannelModal()">Отмена</button>
+      <button class="btn btn-primary" id="chSaveBtn" onclick="saveChannel()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://n8.migas.studio/webhook';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let ratesData   = [];   // [{Name, currency_name, buy_rate, sell_rate, _id}]
+let channelData = [];   // [{Name, channel_id, send_rates_image, active, note, _id}]
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['rates','channels'][i] === tab));
+  document.getElementById('tab-rates').classList.toggle('hidden', tab !== 'rates');
+  document.getElementById('tab-channels').classList.toggle('hidden', tab !== 'channels');
+  if (tab === 'channels' && channelData.length === 0) loadChannels();
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// ─── Status dot ───────────────────────────────────────────────────────────────
+function setStatus(ok) {
+  const d = document.getElementById('statusDot');
+  d.className = 'status-dot ' + (ok ? 'ok' : 'err');
+  d.title = ok ? 'База доступна' : 'Ошибка соединения';
+}
+
+// ─── Fetch helper ─────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(`${API}/${path}`, opts);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+// ─── RATES ────────────────────────────────────────────────────────────────────
+const CURRENCY_LABELS = {
+  USD_NEW: 'Доллар нал',
+  USD_OLD: 'Доллар безнал',
+  EUR:     'Евро',
+  EUR_500: 'Евро 500',
+};
+
+async function loadRates() {
+  document.getElementById('ratesBody').innerHTML = '<div class="loading"><span class="spinner"></span>Загружаем...</div>';
+  document.getElementById('saveRatesBtn').disabled = true;
+  try {
+    const d = await api('GET', 'xrates');
+    ratesData = d.results || [];
+    renderRates();
+    setStatus(true);
+  } catch(e) {
+    document.getElementById('ratesBody').innerHTML = `<div class="loading" style="color:var(--red)">Ошибка: ${e.message}</div>`;
+    setStatus(false);
+  }
+}
+
+function renderRates() {
+  const ORDER = ['USD_NEW','USD_OLD','EUR','EUR_500'];
+  const sorted = ORDER.map(n => ratesData.find(r => r.Name === n)).filter(Boolean);
+
+  let html = `
+    <div class="rates-grid">
+      <div class="hdr">Валюта</div>
+      <div class="hdr">Покупка</div>
+      <div class="hdr">Продажа</div>`;
+
+  for (const r of sorted) {
+    html += `
+      <div class="rate-row">
+        <div class="rate-name">${CURRENCY_LABELS[r.Name] || r.Name}</div>
+        <div class="inp-cell"><input type="number" step="0.01" data-row="${r._id}" data-field="buy"  value="${r.buy_rate}"  oninput="markDirty()"></div>
+        <div class="inp-cell"><input type="number" step="0.01" data-row="${r._id}" data-field="sell" value="${r.sell_rate}" oninput="markDirty()"></div>
+      </div>`;
+  }
+  html += '</div>';
+  document.getElementById('ratesBody').innerHTML = html;
+  document.getElementById('saveRatesBtn').disabled = false;
+}
+
+function markDirty() {
+  document.getElementById('saveRatesBtn').textContent = 'Сохранить курсы ●';
+}
+
+async function saveRates() {
+  const btn = document.getElementById('saveRatesBtn');
+  btn.disabled = true; btn.textContent = 'Сохраняем...';
+
+  const inputs = document.querySelectorAll('#ratesBody input[data-row]');
+  const map = {};
+  inputs.forEach(inp => {
+    const id = inp.dataset.row;
+    if (!map[id]) map[id] = {row_id: id, row: {}};
+    map[id].row[inp.dataset.field === 'buy' ? 'buy_rate' : 'sell_rate'] = parseFloat(inp.value);
+  });
+  const updates = Object.values(map);
+
+  try {
+    await api('POST', 'xrates', {updates});
+    toast('Курсы сохранены ✓');
+    btn.textContent = 'Сохранить курсы';
+    await loadRates();
+  } catch(e) {
+    toast('Ошибка: ' + e.message, 'err');
+    btn.textContent = 'Сохранить курсы';
+    btn.disabled = false;
+  }
+}
+
+// ─── CHANNELS ─────────────────────────────────────────────────────────────────
+async function loadChannels() {
+  document.getElementById('channelsBody').innerHTML = '<div class="loading"><span class="spinner"></span>Загружаем...</div>';
+  try {
+    const d = await api('GET', 'xchannels');
+    channelData = d.results || [];
+    renderChannels();
+  } catch(e) {
+    document.getElementById('channelsBody').innerHTML = `<div class="loading" style="color:var(--red)">Ошибка: ${e.message}</div>`;
+  }
+}
+
+function renderChannels() {
+  if (channelData.length === 0) {
+    document.getElementById('channelsBody').innerHTML = '<div class="loading">Каналов пока нет</div>';
+    return;
+  }
+  let html = `<table class="ch-table">
+    <thead><tr>
+      <th>Название</th><th>ID канала</th><th>Картинка</th><th>Активен</th><th></th>
+    </tr></thead><tbody>`;
+
+  for (const ch of channelData) {
+    const img = ch.send_rates_image ? '<span class="badge on">PNG</span>' : '<span class="badge off">Текст</span>';
+    const act = ch.active ? '<span class="badge on">✓</span>' : '<span class="badge off">—</span>';
+    html += `<tr>
+      <td><b>${esc(ch.Name)}</b>${ch.note ? `<br><small style="color:var(--muted)">${esc(ch.note)}</small>` : ''}</td>
+      <td><span class="ch-id">${esc(ch.channel_id||'')}</span></td>
+      <td style="text-align:center">${img}</td>
+      <td style="text-align:center">${act}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='editChannel(${JSON.stringify(ch)})'>✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteChannel('${ch._id}','${esc(ch.Name)}')">✕</button>
+      </td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('channelsBody').innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Channel modal ────────────────────────────────────────────────────────────
+function openChannelModal(ch) {
+  document.getElementById('chModalTitle').textContent = ch ? 'Редактировать канал' : 'Новый канал';
+  document.getElementById('chRowId').value   = ch?._id || '';
+  document.getElementById('chName').value    = ch?.Name || '';
+  document.getElementById('chId').value      = ch?.channel_id || '';
+  document.getElementById('chImg').checked   = !!ch?.send_rates_image;
+  document.getElementById('chActive').checked = ch == null ? true : !!ch.active;
+  document.getElementById('chNote').value    = ch?.note || '';
+  document.getElementById('chOverlay').classList.add('open');
+}
+
+function editChannel(ch) { openChannelModal(ch) }
+
+function closeChannelModal(e) {
+  if (!e || e.target === document.getElementById('chOverlay'))
+    document.getElementById('chOverlay').classList.remove('open');
+}
+
+async function saveChannel() {
+  const btn = document.getElementById('chSaveBtn');
+  const row_id = document.getElementById('chRowId').value;
+  const payload = {
+    action: row_id ? 'update' : 'create',
+    row_id,
+    name:           document.getElementById('chName').value.trim(),
+    channel_id:     document.getElementById('chId').value.trim(),
+    send_rates_image: document.getElementById('chImg').checked,
+    active:         document.getElementById('chActive').checked,
+    note:           document.getElementById('chNote').value.trim(),
+  };
+  if (!payload.name || !payload.channel_id) { toast('Заполните название и ID', 'err'); return }
+
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await api('POST', 'xchannels', payload);
+    toast(row_id ? 'Канал обновлён ✓' : 'Канал добавлен ✓');
+    closeChannelModal();
+    await loadChannels();
+  } catch(e) {
+    toast('Ошибка: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Сохранить';
+  }
+}
+
+async function deleteChannel(row_id, name) {
+  if (!confirm(`Удалить канал «${name}»?`)) return;
+  try {
+    await api('POST', 'xchannels', {action:'delete', row_id});
+    toast(`«${name}» удалён`);
+    await loadChannels();
+  } catch(e) {
+    toast('Ошибка: ' + e.message, 'err');
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadRates();
+</script>
+</body>
+</html>
