@@ -312,7 +312,6 @@ tr:hover td{background:var(--card2)}
       <label>Медиа</label>
       <div class="seg">
         <button class="seg-btn on" id="mPinned" onclick="setMedia('pinned')">📎 Из поста</button>
-        <button class="seg-btn"    id="mPng"    onclick="setMedia('png')">📊 PNG курсы</button>
         <button class="seg-btn"    id="mNone"   onclick="setMedia('none')">✉️ Без медиа</button>
       </div>
     </div>
@@ -535,7 +534,7 @@ function renderChannels(){
         <div class="ch-name">${esc(ch.Name)}</div>
         <div class="ch-id">${esc(ch.channel_id||'—')}</div>
       </div>
-      <span class="ch-badge ${ch.media_mode==='png'?'img':ch.media_mode==='none'?'txt':'med'}">${ch.media_mode==='png'?'📊 PNG':ch.media_mode==='none'?'✉️ Текст':'📎 Из поста'}</span>
+      <span class="ch-badge ${ch.media_mode==='none'?'txt':'med'}">${ch.media_mode==='none'?'✉️ Текст':'📎 Из поста'}</span>
       <div class="ch-acts">
         <button class="btn btn-g btn-sm btn-ico" onclick='editChannel(${JSON.stringify(ch)})' title="Ред.">✎</button>
         <button class="btn btn-d btn-sm btn-ico" onclick="delChannel('${ch._id}','${esc(ch.Name)}')" title="Удал.">✕</button>
@@ -568,8 +567,7 @@ function maybeClose(e){if(e.target===document.getElementById('overlay'))closeMod
 function setMedia(m){_media=m;syncSeg()}
 function setActive(v){_active=v;syncSeg()}
 function syncSeg(){
-  document.getElementById('mPinned').classList.toggle('on',_media==='pinned');
-  document.getElementById('mPng').classList.toggle('on',_media==='png');
+  document.getElementById('mPinned').classList.toggle('on',_media==='pinned'||_media==='png');
   document.getElementById('mNone').classList.toggle('on',_media==='none');
   document.getElementById('tOn').classList.toggle('on',_active);
   document.getElementById('tOff').classList.toggle('on',!_active);
