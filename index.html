@@ -466,10 +466,10 @@ function fmtRate(v){
 }
 function _digitsToRate(digits){
   if(!digits)return'';
-  const d=digits.slice(-5); // max 99999 → 999.99
-  const intPart=d.length>2?d.slice(0,-2):'0';
-  const decPart=d.slice(-2).padStart(2,'0');
-  return intPart+'.'+decPart;
+  const d=digits.slice(-6);
+  if(d.length<=2)return d;
+  const split=Math.max(2,d.length-2);
+  return d.slice(0,split)+'.'+d.slice(split);
 }
 function rateInput(el){
   const digits=el.value.replace(/\D/g,'');
@@ -482,6 +482,7 @@ function rateBlur(el){
   if(val===''){el.classList.remove('invalid');return}
   const n=parseFloat(val);
   if(isNaN(n)||n<=0){el.classList.add('invalid');return}
+  el.value=n.toFixed(2);
   el.classList.remove('invalid');
 }
 function rateFocus(el){
