@@ -503,11 +503,8 @@ async function saveRates(){
   });
   try{
     await api('POST','xrates',{updates:Object.values(byId)});
-    dirty=false;
-    const now=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('savedAt').textContent=`Обновлено в ${now}`;
-    toast('Курсы опубликованы ✓');
-    await loadRates();
+    alert('Курсы опубликованы ✓');
+    location.replace(location.pathname+'?_v='+Date.now());
   }catch(e){toast('Ошибка: '+e.message,'err');btn.disabled=false;btn.textContent='Опубликовать ●'}
 }
 
