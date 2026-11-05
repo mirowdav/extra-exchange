@@ -464,20 +464,16 @@ function fmtRate(v){
   const n=parseFloat(v);
   return isNaN(n)?'':n.toFixed(2);
 }
+function _digitsToRate(digits){
+  if(!digits)return'';
+  const d=digits.slice(-5); // max 99999 → 999.99
+  const intPart=d.length>2?d.slice(0,-2):'0';
+  const decPart=d.slice(-2).padStart(2,'0');
+  return intPart+'.'+decPart;
+}
 function rateInput(el){
-  // Allow only digits and one dot
-  let val=el.value.replace(/[^\d.]/g,'');
-  const parts=val.split('.');
-  if(parts.length>2)val=parts[0]+'.'+parts.slice(1).join('');
-  // Max 3 digits before dot, max 2 after
-  const [int,dec]=val.split('.');
-  let clean=(int||'').slice(0,3);
-  if(dec!==undefined)clean+='.'+dec.slice(0,2);
-  if(el.value!==clean){
-    const pos=el.selectionStart+(clean.length-el.value.length);
-    el.value=clean;
-    el.setSelectionRange(Math.max(0,pos),Math.max(0,pos));
-  }
+  const digits=el.value.replace(/\D/g,'');
+  el.value=digits?_digitsToRate(digits):'';
   el.classList.remove('invalid');
   markDirty();
 }
@@ -486,7 +482,6 @@ function rateBlur(el){
   if(val===''){el.classList.remove('invalid');return}
   const n=parseFloat(val);
   if(isNaN(n)||n<=0){el.classList.add('invalid');return}
-  el.value=n.toFixed(2);
   el.classList.remove('invalid');
 }
 function rateFocus(el){
